@@ -61,7 +61,7 @@ academic-performance-regression/
 │
 ├── data/
 │   └── student_habits_performance.xlsx    # Conjunto de datos original
-│   └── diccionary_data.xlsx               # Diccionario de datos
+│   └── data_dictionary.xlsx               # Diccionario de datos
 │
 ├── eda/
 │   └── 01_eda_analysis.R                  # Análisis exploratorio de datos
