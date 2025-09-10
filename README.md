@@ -59,10 +59,9 @@ El análisis se divide en dos partes principales:
 ```bash
 academic-performance-regression/
 │
-├── data/               # Datos utilizados en el análisis
-├── report/             # Documento con el reporte completo
-├── plots/              # Gráficos generados
-├── regresion_model.R   # Desarrollo del modelo
+├── data/               # Datos utilizados en el modelo
+├── report/             # Documento con el análisis
+├── regresion_model.R   # Código completo del modelo
 └── README.md
 ```
 
