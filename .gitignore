@@ -1,4 +1,8 @@
+# Archivos generados por RStudio
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
+
+# Proyecto de R
+*.Rproj
