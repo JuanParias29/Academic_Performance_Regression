@@ -59,20 +59,24 @@ El análisis se divide en dos partes principales:
 ```bash
 academic-performance-regression/
 │
-├── data/                         # Contiene el conjunto de datos
-│   └── student_habits_performance.xlsx
+├── data/
+│   └── academic_data.xlsx                 # Conjunto de datos original
 │
-├── model/                        # Código relacionado al modelo y análisis
-│   ├── 01_eda_analysis.R         # Análisis exploratorio de datos (EDA)
-│   ├── 02_model_and_results.R    # Construcción del modelo y análisis de resultados
-│   ├── RData                     # Archivo generado por RStudio
-│   ├── Rhistory                  # Historial de comandos de R
+├── eda/
+│   └── 01_eda_analysis.R                  # Análisis exploratorio de datos
 │
-├── reports/                       # Informes del proyecto
-│   ├── Reporte_1_AR.pdf              # Primer informe del análisis
-│   └── ...                       # Próximos informes se agregarán aquí
+├── model/
+│   ├── full_model.R                       # Modelo completo
+│   └── reduced_model.R                    # Modelo reducido
 │
-└── README.md                     # Documentación general del proyecto
+├── reports/
+│   ├── reporte_1_AR.pdf                       # Primer informe del proyecto
+│   └── ...                                # Informes adicionales
+│
+├── .RData                                 # Archivo de sesión de R
+├── .Rhistory                              # Historial de comandos de R
+└── README.md                              # Documentación general del proyecto
+
 
 ```
 
