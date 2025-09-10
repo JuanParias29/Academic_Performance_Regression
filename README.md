@@ -60,7 +60,8 @@ El análisis se divide en dos partes principales:
 academic-performance-regression/
 │
 ├── data/
-│   └── academic_data.xlsx                 # Conjunto de datos original
+│   └── student_habits_performance.xlsx    # Conjunto de datos original
+│   └── diccionary_data.xlsx               # Diccionario de datos
 │
 ├── eda/
 │   └── 01_eda_analysis.R                  # Análisis exploratorio de datos
@@ -70,7 +71,7 @@ academic-performance-regression/
 │   └── reduced_model.R                    # Modelo reducido
 │
 ├── reports/
-│   ├── reporte_1_AR.pdf                       # Primer informe del proyecto
+│   ├── reporte_1_AR.pdf                   # Primer informe del proyecto
 │   └── ...                                # Informes adicionales
 │
 └── README.md                              # Documentación general del proyecto
