@@ -18,6 +18,9 @@ df$extracurricular_participation <- factor(df$extracurricular_participation)
 # Estructura del conjunto de datos
 str(df)
 
+# Resumen estadistico
+summary(df)
+
 # Cantidad de nulos por variable
 colSums(is.na(df))
 
