@@ -73,8 +73,6 @@ academic-performance-regression/
 │   ├── reporte_1_AR.pdf                       # Primer informe del proyecto
 │   └── ...                                # Informes adicionales
 │
-├── .RData                                 # Archivo de sesión de R
-├── .Rhistory                              # Historial de comandos de R
 └── README.md                              # Documentación general del proyecto
 
 
