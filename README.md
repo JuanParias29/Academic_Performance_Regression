@@ -22,7 +22,7 @@ El análisis se divide en dos partes principales:
   - Las variables explicativas entre sí
 - Interpretación de relaciones observadas:
   - Identificación de relaciones lineales y no lineales
-  - Evaluación de la necesidad de transformaciones de variables
+  - Evaluación de transformaciones de las variables
 
 ### Parte 2: Estimación de modelos, ajuste y validación (80%)
 
