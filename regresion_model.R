@@ -4,7 +4,7 @@ library(ggplot2)
 library(corrplot)
 
 # Leer los datos
-df <- read_excel("student_habits_performance.xlsx")
+df <- read_excel("data/student_habits_performance.xlsx")
 
 # Convertir a factor las variables categóricas
 
