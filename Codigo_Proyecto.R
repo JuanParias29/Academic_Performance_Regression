@@ -5,7 +5,6 @@ library(corrplot)
 
 # Leer los datos
 df <- read_excel("student_habits_performance.xlsx")
-View(df)
 
 # Convertir a factor las variables categóricas
 
@@ -53,6 +52,7 @@ for (var in num_vars) {
   
   print(p)
 }
+
 
 # 1) Selección de variables numéricas
 num_df <- df[, c("age", "study_hours_per_day", "social_media_hours", 
