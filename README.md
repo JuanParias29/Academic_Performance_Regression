@@ -79,13 +79,11 @@ academic-performance-regression/
 
 ```
 
-## 👥 Autores
+## 👥 Data Scientists
 
 - [Juan Pablo Arias](https://github.com/JuanParias29)
 - Sergio Pardo Hurtado
 
 ---
-## 📚 Curso
-Análisis de Regresión
-- **Docente:** Gabriel Camilo Pérez
-- Pontificia Universidad Javeriana
+## 📚 Análisis de Regresión
+**Docente:** Gabriel Camilo Pérez
