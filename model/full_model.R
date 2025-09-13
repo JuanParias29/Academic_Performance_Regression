@@ -6,28 +6,26 @@ library(corrplot)
 # Leer los datos
 df <- read_excel("data/student_habits_performance.xlsx")
 
+# Nuevos nombres para las columnas
+nuevos_nombres <- c("ID_Alumno", "Edad", "Genero", "Horas_Estudio", "Redes_Sociales", 
+                    "Netflix", "Trabajo", "Asistencia", "Horas_Sueño", 
+                    "Calidad_Dieta", "Frecuencia_Ejercicio", "Educacion_Parental", 
+                    "Calidad_Internet", "Salud_Mental", "Act_Extraescolar", "Puntaje_Examen")
+
+# Cambiar los nombres de las columnas
+colnames(df) <- nuevos_nombres
+
 # Convertir a factor las variables categóricas
+df$Genero <- factor(df$Genero)
+df$Trabajo <- factor(df$Trabajo)
+df$Calidad_Dieta <- factor(df$Calidad_Dieta)
+df$Nivel_Educacion_Parental <- factor(df$Educacion_Parental)
+df$Calidad_Internet <- factor(df$Calidad_Internet)
+df$Act_Extraescolar <- factor(df$Act_Extraescolar)
 
-df$gender <- factor(df$gender)
-df$part_time_job <- factor(df$part_time_job)
-df$diet_quality <- factor(df$diet_quality)
-df$parental_education_level <- factor(df$parental_education_level)
-df$internet_quality <- factor(df$internet_quality)
-df$extracurricular_participation <- factor(df$extracurricular_participation)
+# ---------------------------- MODELO COMPLETO ---------------------------------
 
-# --------------------------------------------------------------------
-
-set.seed(123)
-n <- nrow(df)
-n_train <- floor(0.7 * n)
-indices_train <- sample(seq_len(n), size = n_train)
-train_df <- df[indices_train, ]
-test_df  <- df[-indices_train, ]
-
-# =============================
-# MODELO COMPLETO
-# =============================
-modelo_completo <- lm(exam_score ~ age + gender + study_hours_per_day +
+full_model <- lm(exam_score ~ age + gender + study_hours_per_day +
                         social_media_hours + netflix_hours + part_time_job +
                         attendance_percentage + sleep_hours + diet_quality +
                         exercise_frequency + parental_education_level +

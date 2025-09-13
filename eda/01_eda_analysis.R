@@ -23,7 +23,7 @@ df$Nivel_Educacion_Parental <- factor(df$Educacion_Parental)
 df$Calidad_Internet <- factor(df$Calidad_Internet)
 df$Act_Extraescolar <- factor(df$Act_Extraescolar)
 
-#-------------------- EDA ------------------------
+#----------------- Análisis Exploratorio de Datos (EDA) ------------------------
 
 # Estructura del conjunto de datos
 str(df)
