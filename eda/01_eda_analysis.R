@@ -1,9 +1,10 @@
-# Cargar paquetes
+# ------------------------- Cargar paquetes ------------------------------------
 library(readxl)
 library(ggplot2)
 library(corrplot)
+library(knitr)
 
-# Leer los datos
+# --------------------------- Cargar datos -------------------------------------
 df <- read_excel("data/student_habits_performance.xlsx")
 
 # Nuevos nombres para las columnas
@@ -15,7 +16,7 @@ nuevos_nombres <- c("ID_Alumno", "Edad", "Genero", "Horas_Estudio", "Redes_Socia
 # Cambiar los nombres de las columnas
 colnames(df) <- nuevos_nombres
 
-# Convertir a factor las variables categóricas
+# --------------------------- Factores -------------------------------------
 df$Genero <- factor(df$Genero)
 df$Trabajo <- factor(df$Trabajo)
 df$Calidad_Dieta <- factor(df$Calidad_Dieta)
@@ -34,7 +35,23 @@ summary(df)
 # Cantidad de nulos por variable
 colSums(is.na(df))
 
-# Vector con las variables numéricas explicativas
+#-------------------- Correlación Variables Numéricas ------------------------
+
+# Calcular la matriz de correlación
+cor_matrix <- cor(num_vars, use = "complete.obs")
+cor_matrix_rounded <- round(cor_matrix, 2)
+
+# Gráfico de correlación con etiquetas más cortas y ajustes adicionales
+corrplot(cor_matrix_rounded, method = "color", type = "upper", 
+         addCoef.col = "black", tl.cex = 0.8,
+         title = "Matriz de correlación (variables numéricas)",
+         mar = c(0, 0, 2, 0), 
+         tl.labels = etiquetas[names(cor_matrix)],
+         tl.col = "darkgray")
+
+#-------------------- Gráficos Variables Numéricas ------------------------
+
+# Vector con las variables numéricas
 num_vars <- df[, c("Edad", "Horas_Estudio", "Redes_Sociales", 
                    "Netflix", "Asistencia", "Horas_Sueño", 
                    "Frecuencia_Ejercicio", "Salud_Mental", "Puntaje_Examen")]
@@ -66,63 +83,25 @@ for (var_name in names(num_vars)) {
   print(p)
 }
 
-#-------------------- Correlación Lineal Var. Numéricas ------------------------
 
-# Calcular la matriz de correlación
-cor_matrix <- cor(num_vars, use = "complete.obs")
-cor_matrix_rounded <- round(cor_matrix, 2)
+#-------------------- Gráficos Variables Categóricas ----------------------
 
-# Gráfico de correlación con etiquetas más cortas y ajustes adicionales
-corrplot(cor_matrix_rounded, method = "color", type = "upper", 
-         addCoef.col = "black", tl.cex = 0.8,
-         title = "Matriz de correlación (variables numéricas)",
-         mar = c(0, 0, 2, 0), 
-         tl.labels = etiquetas[names(cor_matrix)],
-         tl.col = "darkgray")
+# Lista de variables cualitativas
+factores <- c("Genero", "Trabajo", "Calidad_Dieta", 
+              "Nivel_Educacion_Parental", "Calidad_Internet", "Act_Extraescolar")
 
-#-------------------- Correlacion Lineal Var. Categóricas ----------------------
-
-# Crear dummies para las variables categóricas
-df_dummies <- model.matrix(~ Genero + Trabajo + Calidad_Dieta +
-                             Nivel_Educacion_Parental + Calidad_Internet +
-                             Act_Extraescolar - 1, data = df)
-df_dummies <- as.data.frame(df_dummies)
-
-# Correlación de cada dummy con Puntaje_Examen
-cor_with_score <- cor(df_dummies, df$Puntaje_Examen)
-print(round(cor_with_score, 3))
-
-# ANOVA para variables categóricas
-
-cat_vars <- c("Genero", "Trabajo", "Calidad_Dieta",
-              "Nivel_Educacion_Parental", "Calidad_Internet",
-              "Act_Extraescolar")
-
-anova_results <- lapply(cat_vars, function(var) {
-  mod <- aov(as.formula(paste("Puntaje_Examen ~", var)), data = df)
-  summary(mod)
-})
-names(anova_results) <- cat_vars
-anova_results
-
-# Cargar librería para mostrar como tabla bonita (opcional)
-# install.packages("knitr") # Solo si no está instalada
-library(knitr)
-
-# Crear un resumen de ANOVA para cada variable categórica
-anova_summary_df <- do.call(rbind, lapply(cat_vars, function(var) {
-  mod <- aov(as.formula(paste("Puntaje_Examen ~", var)), data = df)
-  mod_summary <- summary(mod)[[1]]
-  p_value <- mod_summary["Pr(>F)"][1]
-  significance <- ifelse(p_value < 0.05, "Significativo", "No significativo")
+for (var in factores) {
+  p <- ggplot(df, aes_string(x = var, y = "Puntaje_Examen", fill = var)) +
+    stat_summary(fun = mean, geom = "bar", color = "black") +
+    stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
+    labs(x = var, y = "Puntaje promedio") +
+    theme_minimal() +
+    scale_y_continuous(limits = c(0, 75)) + 
+    ggtitle(paste("Puntaje promedio por", var))
   
-  data.frame(
-    Variable = var,
-    `Valor p` = round(p_value, 4),
-    Resultado = significance,
-    check.names = FALSE
-  )
-}))
+  print(p)
+}
 
-# Mostrar tabla en formato bonito
-kable(anova_summary_df, caption = "Resultados ANOVA para variables categóricas")
+
+
+
