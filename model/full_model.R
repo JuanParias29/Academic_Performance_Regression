@@ -1,56 +1,120 @@
-# Cargar paquetes
+# ------------------------- Cargar paquetes ------------------------------------
 library(readxl)
 library(ggplot2)
-library(corrplot)
+library(car)
+library(lmtest)
+library(nortest)
+require(zoo)
+library(MASS)
 
-# Leer los datos
+# --------------------------- Cargar datos -------------------------------------
 df <- read_excel("data/student_habits_performance.xlsx")
 
-# Nuevos nombres para las columnas
+# Nuevos nombres
 nuevos_nombres <- c("ID_Alumno", "Edad", "Genero", "Horas_Estudio", "Redes_Sociales", 
                     "Netflix", "Trabajo", "Asistencia", "Horas_Sueño", 
                     "Calidad_Dieta", "Frecuencia_Ejercicio", "Educacion_Parental", 
                     "Calidad_Internet", "Salud_Mental", "Act_Extraescolar", "Puntaje_Examen")
-
-# Cambiar los nombres de las columnas
 colnames(df) <- nuevos_nombres
 
-# Convertir a factor las variables categóricas
+# --------------------------- Factores -------------------------------------
 df$Genero <- factor(df$Genero)
 df$Trabajo <- factor(df$Trabajo)
 df$Calidad_Dieta <- factor(df$Calidad_Dieta)
-df$Nivel_Educacion_Parental <- factor(df$Educacion_Parental)
+df$Educacion_Parental <- factor(df$Educacion_Parental)
 df$Calidad_Internet <- factor(df$Calidad_Internet)
 df$Act_Extraescolar <- factor(df$Act_Extraescolar)
 
-# ---------------------------- MODELO COMPLETO ---------------------------------
+# ------------------------- Estimación de modelos ------------------------------
 
-full_model <- lm(exam_score ~ age + gender + study_hours_per_day +
-                        social_media_hours + netflix_hours + part_time_job +
-                        attendance_percentage + sleep_hours + diet_quality +
-                        exercise_frequency + parental_education_level +
-                        internet_quality + mental_health_rating +
-                        extracurricular_participation,
-                      data = train_df)
+# Modelo base completo (variables originales)
+Mod_Completo <- lm(Puntaje_Examen ~ Edad + Genero + Horas_Estudio +
+                     Redes_Sociales + Netflix + Trabajo + Asistencia +
+                     Horas_Sueño + Calidad_Dieta + Frecuencia_Ejercicio +
+                     Educacion_Parental + Calidad_Internet + Salud_Mental +
+                     Act_Extraescolar,
+                   data = df)
 
-summary(modelo_completo)
+# Nueva variable Tiempo_Pantalla
+df$Tiempo_Pantalla <- df$Redes_Sociales + df$Netflix
 
-# Predicciones
-pred_test_completo <- predict(modelo_completo, newdata = test_df)
+# Modelo extendido (con transformaciones)
+Mod_Comp_Transformado <- lm(Puntaje_Examen ~ Edad + Genero + Horas_Estudio + I(Horas_Estudio^2) +
+                              Tiempo_Pantalla + Asistencia + I(Asistencia^2) +
+                              Horas_Sueño + I(Horas_Sueño^2) +
+                              Frecuencia_Ejercicio * Salud_Mental +
+                              Calidad_Dieta + Educacion_Parental +
+                              Calidad_Internet + Act_Extraescolar + Trabajo,
+                            data = df)
 
-# Evaluación
-mse_completo <- mean((test_df$exam_score - pred_test_completo)^2)
-rmse_completo <- sqrt(mse_completo)
-r2_completo <- 1 - sum((test_df$exam_score - pred_test_completo)^2) / 
-  sum((test_df$exam_score - mean(test_df$exam_score))^2)
+# ------------------ Comparación de modelos base vs extendido ------------------
 
-# R² ajustado manual
-n_test <- nrow(test_df)
-p_completo <- length(modelo_completo$coefficients) - 1
-r2_adj_completo <- 1 - (1 - r2_completo) * ((n_test - 1) / (n_test - p_completo - 1))
+# Función de comparación sin funciones personalizadas
+comparar_modelos <- function(modelo, nombre){
+  res <- residuals(modelo)
+  data.frame(
+    Modelo = nombre,
+    AIC = AIC(modelo),
+    R2 = summary(modelo)$r.squared,
+    R2_Ajustado = summary(modelo)$adj.r.squared,
+    RMSE = sqrt(mean(res^2))
+  )
+}
 
-cat("\n--- Modelo Completo ---\n")
-cat("MSE:", mse_completo, "\n")
-cat("RMSE:", rmse_completo, "\n")
-cat("R²:", r2_completo, "\n")
-cat("R² ajustado:", r2_adj_completo, "\n")
+# Comparar modelos
+resultados <- rbind(
+  comparar_modelos(Mod_Completo, "Mod_Completo"),
+  comparar_modelos(Mod_Comp_Transformado,  "Mod_Comp_Transformado")
+)
+print(resultados)
+
+# ------------------ Pruebas de hipótesis --------------------
+
+# Global: F-test (ANOVA)
+anova(Mod_Comp_Transformado)
+
+# Individual: t-test
+summary(Mod_Comp_Transformado)
+
+# ------------------ Reducción de modelo usando stepAIC ------------------------
+Mod_Transformado_Reducido  <- stepAIC(Mod_Comp_Transformado, direction = "both", trace = FALSE)
+
+# ------------------ Comparación de modelos final ------------------------------
+resultados <- rbind(
+  comparar_modelos(Mod_Completo, "Mod_Completo"),
+  comparar_modelos(Mod_Comp_Transformado,  "Mod_Comp_Transformado"),
+  comparar_modelos(Mod_Transformado_Reducido,  "Mod_Transformado_Reducido")
+)
+print(resultados)
+
+# ------------------ Validación de supuestos -----------------------------------
+
+# Normalidad de los residuos
+shapiro.test(residuals(Mod_Transformado_Reducido))   # Shapiro-Wilk
+ad.test(residuals(Mod_Transformado_Reducido))        # Anderson-Darling
+lillie.test(residuals(Mod_Transformado_Reducido))    # Kolmogorov-Smirnov (Lilliefors)
+qqnorm(residuals(Mod_Transformado_Reducido)); qqline(residuals(Mod_Transformado_Reducido), col = 2)
+
+# Homocedasticidad
+bptest(Mod_Transformado_Reducido)
+ncvTest(Mod_Transformado_Reducido)
+plot(Mod_Transformado_Reducido$fitted.values, residuals(Mod_Transformado_Reducido),
+     main="Residuos vs Ajustados", xlab="Valores ajustados", ylab="Residuos")
+abline(h = 0, col="red")
+
+# Independencia de errores
+dwtest(Mod_Transformado_Reducido)
+acf(residuals(Mod_Transformado_Reducido), main="ACF de los residuos")
+
+# Multicolinealidad
+vif(Mod_Transformado_Reducido)
+
+# Observaciones influyentes
+plot(cooks.distance(Mod_Transformado_Reducido), type="h", main="Distancia de Cook")
+abline(h = 4/nrow(df), col="red", lty=2)
+influencePlot(Mod_Transformado_Reducido, id.method="identify", main="Puntos influyentes")
+
+
+# ---------------- Modelo seleccionado ---------------
+summary(Mod_Transformado_Reducido)
+
